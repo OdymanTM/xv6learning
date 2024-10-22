@@ -74,6 +74,12 @@ sys_getpid(void)
   return proc->pid;
 }
 
+int
+sys_getfavnum(int)
+{
+  return 6;
+}
+
 uintp
 sys_sbrk(void)
 {
@@ -114,10 +120,11 @@ sys_sleep(void)
 int
 sys_uptime(void)
 {
-  uint xticks;
+  uint xticks; //δέσμευση μνήμης για την unsigned int xticks 
   
-  acquire(&tickslock);
-  xticks = ticks;
-  release(&tickslock);
-  return xticks;
+  acquire(&tickslock); //χρήση spinlock ώστε να μην αλλάξει ή διαβαστεί η global 
+                      // μεταβλητή ticks μέχρι να την ελευθερώσει η sys_uptime
+  xticks = ticks; //ανάθεση της global μεταβλητής ticks στην τοπική μεταβλητή μας xticks
+  release(&tickslock); //ελευθέρωση του spinlock
+  return xticks; 
 }

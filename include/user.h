@@ -24,6 +24,8 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int getpinfo(struct pstat*);
+int getfavnum(void); //int διότι θα επιστρέψει αριθμό
+
 
 // ulib.c
 int stat(char*, struct stat*);
