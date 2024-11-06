@@ -1,0 +1,9 @@
+#include "types.h"
+#include "stat.h"
+#include "user.h"
+
+int main(void) {
+  printf(2, "shutting down...\n");
+  halt();
+  exit();
+}

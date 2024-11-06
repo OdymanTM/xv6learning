@@ -147,7 +147,9 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_getpinfo(void);
 extern int sys_settickets(void);
-extern int sys_getfavnum(int);
+extern int sys_getfavnum(void);
+extern void sys_halt(void);
+extern int sys_getcount(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -171,24 +173,26 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
-[SYS_getfavnum] sys_getfavnum,
+[SYS_getfavnum]   sys_getfavnum,
+[SYS_halt]  sys_halt,
 [SYS_getpinfo]    sys_getpinfo,
+[SYS_getcount]   sys_getcount,
 [SYS_settickets]    sys_settickets
 };
+
+int syscall_counts[NUM_syscalls] = {0};  //tracking sys call executions 
 
 void
 syscall(void)
 {
   int num;
 
-  num = proc->tf->eax; //παίρνει την 
+  num = proc->tf->eax; 
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) { 
-    //έλεγχος για το αν το system call υπάρχει 
+    syscall_counts[num]++;
     proc->tf->eax = syscalls[num](); 
-    //εκτελείται το συγκεκριμένο system call που κάλεσε το συγκεκριμένο 
-    //process και η τιμή που επέστρεψε 
-    //αποθηκεύεται στο register eax ώστε έτσι το user program μπορεί να την λάβει  
-  } else { //σε περίπτωση εισαγωγής λανθασμένου system call number
+
+  } else {
     cprintf("%d %s: unknown sys call %d\n",
             proc->pid, proc->name, num);
     

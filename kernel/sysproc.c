@@ -6,6 +6,7 @@
 #include "mmu.h"
 #include "proc.h"
 
+extern int syscall_counts[];
 extern struct ptable ptable;
 
 int
@@ -25,6 +26,15 @@ int
 sys_wait(void)
 {
   return wait();
+}
+
+int
+sys_getcount(void)
+{int sys_call;
+  if(argint(0, &sys_call) < 0){
+    return -1;
+  }
+  return syscall_counts[sys_call];
 }
 
 int
@@ -75,9 +85,15 @@ sys_getpid(void)
 }
 
 int
-sys_getfavnum(int)
+sys_getfavnum(void)
 {
   return 6;
+}
+
+void
+sys_halt(void)
+{
+  outw(0x604, 0x2000);
 }
 
 uintp

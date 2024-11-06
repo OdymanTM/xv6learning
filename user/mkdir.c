@@ -10,7 +10,7 @@ main(int argc, char *argv[])
   if(argc < 2){ //εάν ο χρήστης δεν δώσει 2ο argument δλδ κάποιο path να δημιουργηθεί, 
                 //τότε exit and print usage comment
                 //(μετράει σαν 1ο argument το όνομα της συνάρτησης)
-    printf(2, "Usage: mkdir files...\n");
+    printf(1, "Usage: mkdir files...\n");
     exit();
   }
 

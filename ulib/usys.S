@@ -4,9 +4,9 @@
 #define SYSCALL(name) \
   .globl name; \
   name: \
-    movl $SYS_ ##τοποθέτηση του αριθμού της system call στο register eax
-    int $T_SYSCALL; \ ##εκτέλεση του interrupt που σηματοδοτεί την εκτέλεση system call
-    ret ##επιστροφή
+    movl $SYS_ ## name, %eax; \
+    int $T_SYSCALL; \
+    ret
 
 SYSCALL(fork)
 SYSCALL(exit)
@@ -32,3 +32,5 @@ SYSCALL(uptime)
 SYSCALL(getpinfo)
 SYSCALL(settickets)
 SYSCALL(getfavnum)
+SYSCALL(halt)
+SYSCALL(getcount)

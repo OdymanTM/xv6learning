@@ -168,10 +168,13 @@ USER_PROGS=\
 	forktest\
 	stat\
 	schedtest\
+	getsyscallcount\
 	grep\
 	init\
 	kill\
+	getfavnumber\
 	ln\
+	shutdown\
 	ls\
 	mkdir\
 	rm\

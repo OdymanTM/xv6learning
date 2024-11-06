@@ -25,9 +25,11 @@ int sleep(int);
 int uptime(void);
 int getpinfo(struct pstat*);
 int getfavnum(void); //int διότι θα επιστρέψει αριθμό
-
+void halt(void);
+int getcount(int syscall);
 
 // ulib.c
+int getfavnum(void);
 int stat(char*, struct stat*);
 char* strcpy(char*, char*);
 void *memmove(void*, void*, int);
