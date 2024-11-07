@@ -4,7 +4,7 @@
 #include "fcntl.h"
 #include "pstat.h"
 
-#define TIMESTEPS 100
+#define TIMESTEPS 1000
 #define LTICKS(x) (x * 1000000)
 
 /* A function to spend some CPU cycles on */
@@ -70,21 +70,15 @@ main(int argc, char *argv[])
 
     int pid_chds[N_C_PROCS];
 
-    int n_tickets[N_C_PROCS]={2,1,300};
+    int n_tickets[N_C_PROCS]={1,3,10};
     pid_chds[0] = getpid();
-
-#ifdef TICKETS
-    settickets(n_tickets[0]);
-#endif
-
+    settickets(pid_chds[0], n_tickets[0]);
     int i; 
     for (i = 1; i < N_C_PROCS; i++) 
     {
         if ((pid_chds[i] = fork()) == 0) 
         {
-#ifdef TICKETS
-            settickets(n_tickets[i]);
-#endif
+            settickets(getpid(), n_tickets[i]);
             int n_spin = LTICKS(5);
             spin(n_spin);
             exit();
@@ -103,7 +97,7 @@ main(int argc, char *argv[])
 
     printf(1, "PID\tTICKS\tIN USE\n");
     
-    // int n_time = atoi(argv[1]); /* You can pass the number of time-steps as a command line argument if you uncomment this. Hard-coded for now. */
+    //int n_time = atoi(argv[1]); /* You can pass the number of time-steps as a command line argument if you uncomment this. Hard-coded for now. */
     int n_time = TIMESTEPS;
 
     spin(LTICKS(1));

@@ -46,7 +46,8 @@ OBJS := \
 	kobj/uart.o\
 	kobj/vectors.o\
 	kobj/vm.o\
-	$(XOBJS)
+	$(XOBJS)\
+	kobj/random.o   
 
 ifneq ("$(MEMFS)","")
 # build filesystem image in to kernel and use memory-ide-device

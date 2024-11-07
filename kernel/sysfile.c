@@ -49,6 +49,8 @@ fdalloc(struct file *f)
   return -1;
 }
 
+
+
 int
 sys_dup(void)
 {
@@ -423,3 +425,4 @@ sys_pipe(void)
   fd[1] = fd1;
   return 0;
 }
+

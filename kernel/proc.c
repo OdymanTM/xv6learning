@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "random.h"
 
 struct ptable ptable;
 
@@ -44,6 +45,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->tickets = 1;
   p->ticks = 0;
   release(&ptable.lock);
 
@@ -81,6 +83,7 @@ userinit(void)
   
   p = allocproc();
   initproc = p;
+  
   if((p->pgdir = setupkvm()) == 0)
     panic("userinit: out of memory?");
   inituvm(p->pgdir, _binary_out_initcode_start, (uintp)_binary_out_initcode_size);
@@ -98,7 +101,6 @@ userinit(void)
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
-
   p->state = RUNNABLE;
 }
 
@@ -144,6 +146,7 @@ fork(void)
   }
   np->sz = proc->sz;
   np->parent = proc;
+  np->tickets = proc->tickets;
   *np->tf = *proc->tf;
 
   // Clear %eax so that fork returns 0 in the child.
@@ -260,41 +263,51 @@ void
 scheduler(void)
 {
   struct proc *p = 0;
+  int total_tickets, winning_ticket, current_ticket;
 
   for(;;){
     // Enable interrupts on this processor.
     sti();
-
-    // no runnable processes? (did we hit the end of the table last time?)
-    // if so, wait for irq before trying again.
+  //ίδια λογική με πριν 
     if (p == &ptable.proc[NPROC])
       hlt();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    total_tickets = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+      if(p->state == RUNNABLE)  //καταμέτρηση των συνολικών tickets
+        total_tickets += p->tickets;
+    } //αν όλα τα tickets είναι 0 δλδ καμία διεργασία δεν είναι σε κατάσταση να συνεχίσει την λειτουργία της τότε
+        // κάνει continue ωστε να γίνει hlt() ο cpu 
+    if (total_tickets == 0) {
+        release(&ptable.lock);
         continue;
+    }
+    winning_ticket = rand_ticket(total_tickets); //μας δίνει τυχαίο αριθμό από 1 εως total_tickets
+    current_ticket = 0;  //ticket count για να βρω το νικητήριο ticket 
+    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+      if (p->state != RUNNABLE) //μετράω τα tickets των runnable διεργασιών μέχρι να φτάσω στο winning ticket 
+          continue;
+      current_ticket += p->tickets;
+      //όταν φτάσω στο winning ticket τότε κανω context switch σε εκείνη την διεργασία που κέρδισε
+      if (current_ticket >= winning_ticket) {
+          proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+          p->inuse = 1;
+          swtch(&cpu->scheduler, proc->context);
+          switchkvm();
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
-      p->inuse = 1;
-
-      swtch(&cpu->scheduler, proc->context);
-    
-      switchkvm();
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      proc = 0;
+          proc = 0;
+          break;
+      }
     }
     release(&ptable.lock);
 
+    }
   }
-}
+
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state.

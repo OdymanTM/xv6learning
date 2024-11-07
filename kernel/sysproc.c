@@ -37,6 +37,33 @@ sys_getcount(void)
   return syscall_counts[sys_call];
 }
 
+int sys_settickets(void) {
+  int pid;
+  int ticketNumber;
+  struct proc *p;
+
+   if (argint(0, &pid) < 0) {
+    return -1; 
+  }
+
+  if (argint(1, &ticketNumber) < 0) {
+    return -1; 
+  }
+  
+  acquire(&ptable.lock);
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+    if (p->pid == pid) {
+      p->tickets = ticketNumber; 
+      release(&ptable.lock);     
+      return 0;                 
+    }
+  }
+  release(&ptable.lock);   
+    
+    return -1;
+}
+
+
 int
 sys_kill(void)
 {

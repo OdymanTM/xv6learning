@@ -200,6 +200,3 @@ syscall(void)
   }
 }
 
-int sys_settickets(void) {
-    return -1;
-}

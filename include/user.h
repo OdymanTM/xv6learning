@@ -27,6 +27,7 @@ int getpinfo(struct pstat*);
 int getfavnum(void); //int διότι θα επιστρέψει αριθμό
 void halt(void);
 int getcount(int syscall);
+int sys_settickets(int pid, int ticketNumber);
 
 // ulib.c
 int getfavnum(void);
